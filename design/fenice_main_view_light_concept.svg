@@ -1,0 +1,200 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" style="background:#F4F3EF; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <defs>
+    <!-- Ceramic Alabaster Surface Gradient -->
+    <radialGradient id="ceramicSurface" cx="50%" cy="48%" r="65%">
+      <stop offset="0%" stop-color="#FAF9F5" stop-opacity="1"/>
+      <stop offset="65%" stop-color="#F2F0EC" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#E7E5DF" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- Recessed Porcelain Core Well -->
+    <radialGradient id="porcelainWell" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="70%" stop-color="#F6F5F1" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#E5E3DC" stop-opacity="1"/>
+    </radialGradient>
+
+    <!-- Warm Solar Copper / Terracotta Bloom -->
+    <radialGradient id="copperBloom" cx="56%" cy="42%" r="48%">
+      <stop offset="0%" stop-color="#E04800" stop-opacity="0.20"/>
+      <stop offset="45%" stop-color="#F58200" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#E04800" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Anodized Copper Linear Arc -->
+    <linearGradient id="copperArc" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#141416" stop-opacity="0.2"/>
+      <stop offset="50%" stop-color="#D94000" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#FF6B00" stop-opacity="1"/>
+    </linearGradient>
+
+    <!-- Clip for Core Interior -->
+    <clipPath id="coreClipLight">
+      <circle cx="480" cy="288" r="148"/>
+    </clipPath>
+  </defs>
+
+  <!-- 1. Ceramic Alabaster Background -->
+  <rect width="960" height="600" fill="url(#ceramicSurface)"/>
+
+  <!-- Whisper-Fine Technical Drafting Hairlines -->
+  <line x1="480" y1="48" x2="480" y2="532" stroke="#141416" stroke-opacity="0.045" stroke-width="1"/>
+  <line x1="0" y1="288" x2="960" y2="288" stroke="#141416" stroke-opacity="0.045" stroke-width="1"/>
+  <circle cx="480" cy="288" r="236" fill="none" stroke="#141416" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="2 8"/>
+
+  <!-- 2. Top Minimal Header Bar (48px) -->
+  <g id="topBarLight">
+    <rect x="0" y="0" width="960" height="48" fill="#F7F6F2"/>
+    <line x1="0" y1="48" x2="960" y2="48" stroke="#141416" stroke-opacity="0.08" stroke-width="1"/>
+
+    <!-- Brand Identity -->
+    <g transform="translate(28, 29)">
+      <circle cx="0" cy="-5" r="3.5" fill="none" stroke="#E04800" stroke-width="1.5"/>
+      <circle cx="0" cy="-5" r="1" fill="#141416"/>
+      <text x="14" y="0" fill="#141416" font-size="12" font-weight="600" letter-spacing="5">FENICE</text>
+      <text x="96" y="-1" fill="#8A8A8E" font-size="9" font-family="'JetBrains Mono', monospace" letter-spacing="1.5">CERAMIC CONCEPT</text>
+    </g>
+
+    <!-- Center Minimal User Kit Pill -->
+    <g transform="translate(370, 10)">
+      <rect x="0" y="0" width="220" height="28" rx="14" fill="#ECEAE4" stroke="#141416" stroke-opacity="0.09" stroke-width="1"/>
+      <path d="M 18 11 L 14 14 L 18 17" fill="none" stroke="#71717A" stroke-width="1.2" stroke-linecap="round"/>
+      <text x="110" y="18" fill="#141416" font-size="10.5" font-weight="500" letter-spacing="1.4" text-anchor="middle">USER KIT // CERAMIC</text>
+      <path d="M 202 11 L 206 14 L 202 17" fill="none" stroke="#71717A" stroke-width="1.2" stroke-linecap="round"/>
+    </g>
+
+    <!-- Right Controls -->
+    <g transform="translate(756, 10)">
+      <rect x="0" y="0" width="176" height="28" rx="14" fill="#ECEAE4" stroke="#141416" stroke-opacity="0.09" stroke-width="1"/>
+      <rect x="3" y="3" width="85" height="22" rx="11" fill="#141416"/>
+      <text x="45.5" y="17.5" fill="#F4F3EF" font-size="9.5" font-weight="600" letter-spacing="2" text-anchor="middle">MAIN</text>
+      <text x="131" y="17.5" fill="#71717A" font-size="9.5" font-weight="500" letter-spacing="2" text-anchor="middle">PRO</text>
+    </g>
+  </g>
+
+  <!-- 3. THE FENICE ECLIPSE — Ceramic & Carbon Light Edition -->
+  <g id="feniceEclipseLight">
+    <!-- Outer Dimensional Bezel -->
+    <circle cx="480" cy="288" r="196" fill="none" stroke="#141416" stroke-opacity="0.06" stroke-width="1"/>
+    <circle cx="480" cy="288" r="178" fill="none" stroke="#E6E4DD" stroke-width="18"/>
+    <circle cx="480" cy="288" r="187" fill="none" stroke="#141416" stroke-opacity="0.08" stroke-width="1"/>
+    <circle cx="480" cy="288" r="169" fill="none" stroke="#141416" stroke-opacity="0.12" stroke-width="1"/>
+
+    <!-- Precision Carbon Degree Ticks -->
+    <g stroke="#141416" stroke-opacity="0.35" stroke-width="1">
+      <line x1="480" y1="84" x2="480" y2="92"/>
+      <line x1="684" y1="288" x2="676" y2="288"/>
+      <line x1="480" y1="492" x2="480" y2="484"/>
+      <line x1="276" y1="288" x2="284" y2="288"/>
+      <circle cx="480" cy="288" r="178" fill="none" stroke="#141416" stroke-opacity="0.22" stroke-width="4" stroke-dasharray="1 11.65"/>
+    </g>
+
+    <!-- Active Outer Ring Arc in Carbon + Anodized Copper -->
+    <path d="M 354.1 413.9 A 178 178 0 1 1 634.1 199.0" fill="none" stroke="url(#copperArc)" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="634.1" cy="199.0" r="6" fill="#F4F3EF" stroke="#E04800" stroke-width="2.2"/>
+
+    <!-- Inner Porcelain Well -->
+    <circle cx="480" cy="288" r="150" fill="url(#porcelainWell)" stroke="#141416" stroke-opacity="0.14" stroke-width="1"/>
+
+    <g clip-path="url(#coreClipLight)">
+      <circle cx="480" cy="288" r="150" fill="url(#copperBloom)"/>
+
+      <!-- Concentric Drafting Rings -->
+      <circle cx="480" cy="288" r="115" fill="none" stroke="#141416" stroke-opacity="0.05" stroke-width="1"/>
+      <circle cx="480" cy="288" r="78" fill="none" stroke="#141416" stroke-opacity="0.05" stroke-width="1" stroke-dasharray="2 6"/>
+      <circle cx="480" cy="288" r="40" fill="none" stroke="#141416" stroke-opacity="0.05" stroke-width="1"/>
+
+      <!-- Fine Graphite & Copper Spectral Filaments -->
+      <g fill="none" stroke-linecap="round">
+        <path d="M 332 298 C 378 220, 442 340, 514 252 C 558 198, 594 264, 628 242" stroke="#141416" stroke-opacity="0.18" stroke-width="1.2"/>
+        <path d="M 332 272 C 385 338, 452 204, 516 268 C 565 316, 596 238, 628 278" stroke="#141416" stroke-opacity="0.12" stroke-width="1.0"/>
+        <path d="M 334 312 C 384 282, 434 218, 514 252 C 562 272, 594 218, 628 232" stroke="#E04800" stroke-opacity="0.75" stroke-width="2"/>
+        <path d="M 336 264 C 394 294, 456 286, 514 252 C 560 225, 592 268, 626 264" stroke="#141416" stroke-opacity="0.65" stroke-width="1.5"/>
+      </g>
+
+      <!-- 2D Magnetic Singularity Node (Carbon + Copper) -->
+      <g transform="translate(514, 252)">
+        <circle cx="0" cy="0" r="36" fill="none" stroke="#141416" stroke-opacity="0.25" stroke-width="1" stroke-dasharray="3 3"/>
+        <circle cx="0" cy="0" r="22" fill="#E04800" fill-opacity="0.08" stroke="#E04800" stroke-opacity="0.65" stroke-width="1.2"/>
+        <circle cx="0" cy="0" r="5" fill="#141416" stroke="#E04800" stroke-width="2"/>
+      </g>
+    </g>
+
+    <!-- Left & Right Architectural Readouts -->
+    <g transform="translate(198, 276)" text-anchor="end">
+      <text x="0" y="0" fill="#8A8A8E" font-size="8.5" font-weight="600" letter-spacing="2">CHIMERA BIAS // X·Y</text>
+      <text x="0" y="18" fill="#141416" font-size="13" font-family="'JetBrains Mono', monospace" letter-spacing="1">+0.64  <tspan fill="#E04800">·</tspan>  0.78</text>
+      <text x="0" y="34" fill="#8A8A8E" font-size="8" font-family="'JetBrains Mono', monospace" letter-spacing="1">HARMONIC LOCK</text>
+    </g>
+    <line x1="212" y1="288" x2="266" y2="288" stroke="#141416" stroke-opacity="0.12" stroke-width="1"/>
+
+    <g transform="translate(762, 276)" text-anchor="start">
+      <text x="0" y="0" fill="#8A8A8E" font-size="8.5" font-weight="600" letter-spacing="2">SPECTRAL FLUX // ORBIT</text>
+      <text x="0" y="18" fill="#141416" font-size="13" font-family="'JetBrains Mono', monospace" letter-spacing="1">74.2%  <tspan fill="#E04800">·</tspan>  32ms</text>
+      <text x="0" y="34" fill="#8A8A8E" font-size="8" font-family="'JetBrains Mono', monospace" letter-spacing="1">TILING APERTURE</text>
+    </g>
+    <line x1="694" y1="288" x2="748" y2="288" stroke="#141416" stroke-opacity="0.12" stroke-width="1"/>
+
+    <text x="480" y="514" fill="#8A8A8E" font-size="8.5" font-family="'JetBrains Mono', monospace" letter-spacing="2.1" text-anchor="middle">FUTURE LIGHT CONCEPT (CERAMIC &amp; CARBON) · DROP WAV ON CORE OR SLOTS</text>
+  </g>
+
+  <!-- 4. Bottom Recessed User Sample Dock -->
+  <g id="bottomSampleStripLight" transform="translate(0, 540)">
+    <rect x="0" y="0" width="960" height="60" fill="#EAE8E1"/>
+    <line x1="0" y1="0" x2="960" y2="0" stroke="#141416" stroke-opacity="0.08" stroke-width="1"/>
+
+    <text x="28" y="33" fill="#71717A" font-size="8.5" font-weight="600" letter-spacing="2">SOURCES</text>
+
+    <g transform="translate(106, 15)" font-family="'JetBrains Mono', monospace" font-size="8.5">
+      <g transform="translate(0, 0)">
+        <rect x="0" y="0" width="84" height="28" rx="6" fill="#F9F8F5" stroke="#E04800" stroke-opacity="0.6" stroke-width="1"/>
+        <circle cx="11" cy="14" r="2.5" fill="#E04800"/>
+        <text x="19" y="17.2" fill="#141416" letter-spacing="0.2">I·PIANO.W</text>
+        <line x1="10" y1="24" x2="68" y2="24" stroke="#E04800" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(92, 0)">
+        <rect x="0" y="0" width="84" height="28" rx="6" fill="#F4F3EF" stroke="#141416" stroke-opacity="0.12" stroke-width="1"/>
+        <circle cx="11" cy="14" r="2" fill="#141416"/>
+        <text x="19" y="17.2" fill="#141416" letter-spacing="0.2">II·VOX_CH</text>
+        <line x1="10" y1="24" x2="54" y2="24" stroke="#141416" stroke-opacity="0.45" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(184, 0)">
+        <rect x="0" y="0" width="84" height="28" rx="6" fill="#F9F8F5" stroke="#E04800" stroke-opacity="0.4" stroke-width="1"/>
+        <circle cx="11" cy="14" r="2.5" fill="#E04800"/>
+        <text x="19" y="17.2" fill="#141416" letter-spacing="0.2">III·TAPE</text>
+        <line x1="10" y1="24" x2="62" y2="24" stroke="#E04800" stroke-opacity="0.8" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(276, 0)">
+        <rect x="0" y="0" width="84" height="28" rx="6" fill="#EFECE6" stroke="#141416" stroke-opacity="0.09" stroke-width="1"/>
+        <circle cx="11" cy="14" r="2" fill="#8A8A8E"/>
+        <text x="19" y="17.2" fill="#52525B" letter-spacing="0.2">IV·BRASS</text>
+        <line x1="10" y1="24" x2="36" y2="24" stroke="#8A8A8E" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <g transform="translate(368, 0)">
+        <rect x="0" y="0" width="84" height="28" rx="6" fill="#E6E4DD" stroke="#141416" stroke-opacity="0.16" stroke-width="1" stroke-dasharray="2.5 2.5"/>
+        <text x="42" y="17.2" fill="#71717A" text-anchor="middle" letter-spacing="0.5">V · + DROP</text>
+      </g>
+      <g transform="translate(460, 0)">
+        <rect x="0" y="0" width="84" height="28" rx="6" fill="#E6E4DD" stroke="#141416" stroke-opacity="0.16" stroke-width="1" stroke-dasharray="2.5 2.5"/>
+        <text x="42" y="17.2" fill="#71717A" text-anchor="middle" letter-spacing="0.5">VI · + DROP</text>
+      </g>
+      <g transform="translate(552, 0)">
+        <rect x="0" y="0" width="84" height="28" rx="6" fill="#E6E4DD" stroke="#141416" stroke-opacity="0.16" stroke-width="1" stroke-dasharray="2.5 2.5"/>
+        <text x="42" y="17.2" fill="#71717A" text-anchor="middle" letter-spacing="0.5">VII · + DROP</text>
+      </g>
+      <g transform="translate(644, 0)">
+        <rect x="0" y="0" width="84" height="28" rx="6" fill="#E6E4DD" stroke="#141416" stroke-opacity="0.16" stroke-width="1" stroke-dasharray="2.5 2.5"/>
+        <text x="42" y="17.2" fill="#71717A" text-anchor="middle" letter-spacing="0.5">VIII·+ DROP</text>
+      </g>
+    </g>
+
+    <!-- Right Output Level Hairline Meter -->
+    <g transform="translate(862, 22)">
+      <text x="0" y="11" fill="#71717A" font-size="8.5" font-family="'JetBrains Mono', monospace">OUT</text>
+      <rect x="28" y="4" width="42" height="3" rx="1.5" fill="#D8D5CD"/>
+      <rect x="28" y="4" width="32" height="3" rx="1.5" fill="#141416"/>
+      <rect x="28" y="9" width="42" height="3" rx="1.5" fill="#D8D5CD"/>
+      <rect x="28" y="9" width="30" height="3" rx="1.5" fill="#E04800"/>
+    </g>
+  </g>
+</svg>

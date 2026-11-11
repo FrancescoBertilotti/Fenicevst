@@ -1,0 +1,56 @@
+"""
+SpecTile Python Research Prototype & Golden Reference Engine (Settore 5).
+Pure Python 3.12 implementation (zero external dependencies).
+"""
+
+from .spectile_engine import (
+    fft_radix2,
+    rfft_batch,
+    irfft_batch,
+    gaussian_window,
+    check_nola_cola,
+    stft,
+    istft,
+    hz_to_erb_rate,
+    erb_rate_to_hz,
+    erb_bandwidth_hz,
+    ERBFilterbank,
+    decompose_hpr,
+    extract_true_envelope,
+    SpectralSampleData,
+    analyze_sample,
+    RuleConfig,
+    ARCHETYPES,
+    SpectralGenomeEngine,
+    compute_rule_masks,
+    feather_masks_2d,
+    reconstruct_phase_mspghi,
+    synthesize_chimera,
+    compute_objective_metrics,
+)
+
+__all__ = [
+    "fft_radix2",
+    "rfft_batch",
+    "irfft_batch",
+    "gaussian_window",
+    "check_nola_cola",
+    "stft",
+    "istft",
+    "hz_to_erb_rate",
+    "erb_rate_to_hz",
+    "erb_bandwidth_hz",
+    "ERBFilterbank",
+    "decompose_hpr",
+    "extract_true_envelope",
+    "SpectralSampleData",
+    "analyze_sample",
+    "RuleConfig",
+    "ARCHETYPES",
+    "SpectralGenomeEngine",
+    "compute_rule_masks",
+    "feather_masks_2d",
+    "reconstruct_phase_mspghi",
+    "synthesize_chimera",
+    "compute_objective_metrics",
+]

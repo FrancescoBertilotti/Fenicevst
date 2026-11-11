@@ -1,0 +1,52 @@
+# Build & CMake generated directories
+build/
+build-*/
+out/
+cmake-build-*/
+_deps/
+JuceLibraryCode/
+Builds/
+
+# Compiled binaries & plugin bundles
+*.exe
+*.dll
+*.lib
+*.exp
+*.pdb
+*.ilk
+*.obj
+*.o
+*.a
+*.so
+*.dylib
+*.vst3
+*.vst3/
+*.component/
+*.app/
+*.lv2/
+
+# IDE & OS metadata
+.vs/
+.vscode/
+.idea/
+*.sln
+*.vcxproj*
+*.user
+*.suo
+*.Cache
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python caches & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Generated benchmark audio & heavy rasterized/vector outputs (regenerable via scripts/CLI)
+spectile_proto/output/audio/*.wav
+spectile_proto/output/figures/*.svg

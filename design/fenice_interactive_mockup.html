@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FENICE — Minimalist Spectral Chimera Instrument (Interactive Prototype)</title>
+<style>
+  :root {
+    --bg-void: #08080A;
+    --bg-panel: #0C0C10;
+    --bg-elevated: #121217;
+    --bg-well: #060608;
+    --ink-primary: #F4F4F6;
+    --ink-secondary: #A1A1AA;
+    --ink-muted: #52525B;
+    --hairline: rgba(255, 255, 255, 0.07);
+    --hairline-subtle: rgba(255, 255, 255, 0.035);
+    --accent-primary: #FF5500;
+    --accent-secondary: #FFB800;
+    --accent-glow: rgba(255, 85, 0, 0.28);
+    --filament-ash: rgba(228, 228, 231, 0.35);
+  }
+
+  body.theme-light {
+    --bg-void: #F4F3EF;
+    --bg-panel: #ECEAE4;
+    --bg-elevated: #FAF9F5;
+    --bg-well: #FFFFFF;
+    --ink-primary: #141416;
+    --ink-secondary: #52525B;
+    --ink-muted: #8A8A8E;
+    --hairline: rgba(20, 20, 22, 0.09);
+    --hairline-subtle: rgba(20, 20, 22, 0.04);
+    --accent-primary: #E04800;
+    --accent-secondary: #141416;
+    --accent-glow: rgba(224, 72, 0, 0.16);
+    --filament-ash: rgba(20, 20, 22, 0.28);
+  }
+
+  * {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #040405;
+    color: var(--ink-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+    transition: background 0.35s ease;
+  }
+
+  body.theme-light {
+    background: #E2E0D8;
+  }
+
+  /* Plugin Window Frame (960x600 fixed aspect ratio like VST3/AU) */
+  .plugin-shell {
+    position: relative;
+    width: 960px;
+    height: 600px;
+    background: var(--bg-void);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    box-shadow: 0 32px 90px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  }
+
+  body.theme-light .plugin-shell {
+    box-shadow: 0 28px 70px rgba(20, 20, 22, 0.18), 0 0 0 1px rgba(20, 20, 22, 0.08);
+  }
+
+  /* ================================================================= */
+  /* TOP HEADER BAR (48px)                                             */
+  /* ================================================================= */
+  .top-bar {
+    height: 48px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--hairline);
+    background: var(--bg-panel);
+    z-index: 20;
+    transition: background 0.35s ease, border-color 0.35s ease;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .brand-emblem {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent-primary);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brand-emblem::after {
+    content: '';
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--accent-secondary);
+  }
+
+  .brand-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    color: var(--ink-primary);
+  }
+
+  .brand-sub {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--ink-muted);
+    margin-left: 4px;
+  }
+
+  /* Center Preset Selector */
+  .preset-pill {
+    height: 28px;
+    padding: 0 14px;
+    border-radius: 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.15s ease;
+  }
+
+  .preset-pill:hover {
+    border-color: var(--accent-primary);
+  }
+
+  .preset-arrow {
+    font-size: 10px;
+    color: var(--ink-muted);
+    padding: 2px 4px;
+  }
+
+  .preset-name {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.6px;
+    color: var(--ink-primary);
+    min-width: 150px;
+    text-align: center;
+  }
+
+  /* Right Action Bar */
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-pill {
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--hairline);
+    color: var(--ink-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-pill:hover {
+    color: var(--ink-primary);
+    border-color: var(--accent-primary);
+  }
+
+  .btn-pill.active-audio {
+    border-color: var(--accent-primary);
+    color: var(--ink-primary);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+
+  .dot-indicator {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--ink-muted);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-pill.active-audio .dot-indicator {
+    background: var(--accent-primary);
+    box-shadow: 0 0 6px var(--accent-primary);
+  }
+
+  /* Segmented MAIN / PRO Switch */
+  .segmented-switch {
+    height: 28px;
+    padding: 2px;
+    border-radius: 14px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+  }
+
+  .seg-btn {
+    height: 22px;
+    padding: 0 16px;
+    border-radius: 11px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink-muted);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .seg-btn.active {
+    background: var(--bg-panel);
+    color: var(--ink-primary);
+    border-color: var(--accent-primary);
+  }
+
+  /* ================================================================= */
+  /* VIEWPORT CONTAINER (MAIN vs PRO)                                  */
+  /* ================================================================= */
+  .viewport {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .view-layer {
+    position: absolute;
+    inset: 0;
+    transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1), transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .view-layer.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.985);
+  }
+
+  /* ================================================================= */
+  /* 1. MAIN VIEW — THE FENICE ECLIPSE                                 */
+  /* ================================================================= */
+  #mainCanvas {
+    width: 960px;
+    height: 492px;
+    display: block;
+    cursor: grab;
+  }
+
+  #mainCanvas:active {
+    cursor: grabbing;
+  }
+
+  .flank-readout {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .flank-readout.left {
+    left: 64px;
+    text-align: right;
+  }
+
+  .flank-readout.right {
+    right: 64px;
+    text-align: left;
+  }
+
+  .readout-label {
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--ink-muted);
+  }
+
+  .readout-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--ink-primary);
+  }
+
+  .readout-val span {
+    color: var(--accent-primary);
+  }
+
+  .readout-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1.2px;
+    color: var(--ink-muted);
+  }
+
+  .core-caption {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5px;
+    letter-spacing: 2.2px;
+    color: var(--ink-muted);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* ================================================================= */
+  /* 2. PRO VIEW — SWISS ARCHITECTURAL 3-COLUMN GRID                   */
+  /* ================================================================= */
+  .pro-grid {
+    display: grid;
+    grid-template-columns: 280px 384px 296px;
+    height: 100%;
+    background: var(--bg-void);
+  }
+
+  .pro-col {
+    padding: 24px 26px;
+    border-right: 1px solid var(--hairline);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .pro-col:last-child {
+    border-right: none;
+  }
+
+  .sec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 2.2px;
+    color: var(--ink-muted);
+  }
+
+  .sec-header span.mono-tag {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-primary);
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+
+  /* Source List in Pro View (All 8 User Slots) */
+  .pro-col-compact {
+    padding: 16px 22px;
+    gap: 10px;
+  }
+
+  .sec-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-ghost-xs {
+    height: 18px;
+    padding: 0 7px;
+    border-radius: 4px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--hairline);
+    color: var(--ink-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-ghost-xs:hover {
+    border-color: var(--accent-primary);
+    color: var(--ink-primary);
+  }
+
+  .btn-ghost-xs.ember {
+    border-color: rgba(255, 85, 0, 0.45);
+    color: var(--accent-secondary);
+  }
+
+  .source-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .source-row {
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: var(--bg-panel);
+    border: 1px solid var(--hairline);
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+
+  .source-row:hover {
+    border-color: rgba(255, 85, 0, 0.4);
+  }
+
+  .source-row.selected {
+    border-color: var(--accent-primary);
+    background: var(--bg-elevated);
+  }
+
+  .source-row.empty {
+    background: transparent;
+    border: 1px dashed var(--hairline);
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .source-row.empty:hover,
+  .source-row.drag-hover {
+    border-color: var(--accent-primary);
+    background: rgba(255, 85, 0, 0.06);
+  }
+
+  .source-row.muted {
+    opacity: 0.55;
+  }
+
+  .source-row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    font-size: 9.5px;
+    margin-bottom: 3px;
+  }
+
+  .source-row.empty .source-row-top {
+    margin-bottom: 0;
+    width: 100%;
+  }
+
+  .source-roman {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-primary);
+    min-width: 22px;
+    font-size: 9px;
+  }
+
+  .source-row.empty .source-roman {
+    color: var(--ink-muted);
+  }
+
+  .source-title {
+    color: var(--ink-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .source-row.empty .source-title {
+    color: var(--ink-muted);
+    font-weight: 400;
+    font-size: 8.5px;
+  }
+
+  .source-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5px;
+    color: var(--ink-secondary);
+  }
+
+  .row-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .source-row:hover .row-actions,
+  .source-row.selected .row-actions {
+    opacity: 1;
+  }
+
+  .row-act-btn {
+    border: none;
+    background: transparent;
+    color: var(--ink-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 0 3px;
+    cursor: pointer;
+  }
+
+  .row-act-btn:hover {
+    color: var(--accent-primary);
+  }
+
+  /* Inspector Card in Col 01 */
+  .inspector-box {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  #inspectorWaveCanvas {
+    width: 100%;
+    height: 46px;
+    border-radius: 5px;
+    background: var(--bg-panel);
+    border: 1px solid var(--hairline);
+    display: block;
+  }
+
+  .trim-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .mode-pills {
+    display: flex;
+    gap: 4px;
+  }
+
+  .mode-pill-btn {
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--hairline);
+    background: var(--bg-panel);
+    color: var(--ink-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7.5px;
+    cursor: pointer;
+  }
+
+  .mode-pill-btn.active {
+    border-color: var(--accent-primary);
+    color: var(--ink-primary);
+  }
+
+  /* Minimalist Hairline Slider */
+  .hairline-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2px;
+    background: var(--hairline);
+    outline: none;
+    cursor: ew-resize;
+  }
+
+  .hairline-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ink-primary);
+    border: 1.5px solid var(--accent-primary);
+    cursor: ew-resize;
+  }
+
+  /* Pro Center Canvas (Monochrome Spectral Transfer Curve) */
+  #proSpectrumCanvas {
+    width: 332px;
+    height: 210px;
+    border-radius: 8px;
+    background: var(--bg-panel);
+    border: 1px solid var(--hairline);
+    cursor: crosshair;
+  }
+
+  /* 4 Rotary Encoders Row */
+  .knobs-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding-top: 6px;
+  }
+
+  .knob-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: ns-resize;
+  }
+
+  .knob-svg {
+    width: 56px;
+    height: 56px;
+  }
+
+  .knob-label {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--ink-muted);
+  }
+
+  /* Parameter Sliders in Column 3 */
+  .param-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .param-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .param-top {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-secondary);
+  }
+
+  .param-top span.val {
+    color: var(--ink-primary);
+  }
+
+  /* ================================================================= */
+  /* BOTTOM RECESSED SAMPLE STRIP (60px)                               */
+  /* ================================================================= */
+  .bottom-strip {
+    height: 60px;
+    padding: 0 24px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 20;
+    transition: background 0.35s ease, border-color 0.35s ease;
+  }
+
+  .strip-label {
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--ink-muted);
+  }
+
+  .sample-pills {
+    display: flex;
+    gap: 8px;
+  }
+
+  .sample-slot {
+    position: relative;
+    width: 86px;
+    height: 30px;
+    border-radius: 6px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--hairline);
+    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    overflow: hidden;
+  }
+
+  .sample-slot:hover {
+    border-color: var(--accent-primary);
+  }
+
+  .sample-slot.active {
+    border-color: rgba(255, 85, 0, 0.48);
+  }
+
+  .sample-slot.empty {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--hairline);
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .sample-slot.empty:hover,
+  .sample-slot.drag-hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  .sample-slot.empty .slot-top {
+    color: var(--ink-muted);
+    justify-content: center;
+    font-size: 8px;
+  }
+
+  .slot-top {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    color: var(--ink-primary);
+    white-space: nowrap;
+  }
+
+  .slot-name-txt {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 56px;
+  }
+
+  .slot-hover-acts {
+    position: absolute;
+    top: 2px;
+    right: 3px;
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    background: var(--bg-elevated);
+    padding: 0 2px;
+    border-radius: 3px;
+    transition: opacity 0.15s ease;
+  }
+
+  .sample-slot.loaded:hover .slot-hover-acts {
+    opacity: 1;
+  }
+
+  .slot-mini-btn {
+    border: none;
+    background: transparent;
+    color: var(--ink-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    line-height: 1;
+    padding: 1px 2px;
+    cursor: pointer;
+  }
+
+  .slot-mini-btn:hover {
+    color: var(--accent-primary);
+  }
+
+  /* Drag-and-Drop Overlay over Main Core */
+  .drop-overlay {
+    position: absolute;
+    inset: 48px 0 60px 0;
+    background: rgba(8, 8, 10, 0.78);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+    z-index: 30;
+  }
+
+  body.theme-light .drop-overlay {
+    background: rgba(244, 243, 239, 0.82);
+  }
+
+  .drop-overlay.visible {
+    opacity: 1;
+  }
+
+  .drop-ring {
+    width: 310px;
+    height: 310px;
+    border-radius: 50%;
+    border: 1.5px dashed var(--accent-primary);
+    box-shadow: 0 0 40px var(--accent-glow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .drop-ring-title {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    color: var(--ink-primary);
+  }
+
+  .drop-ring-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5px;
+    letter-spacing: 1px;
+    color: var(--accent-secondary);
+  }
+
+  .slot-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+  }
+
+  .sample-slot.muted .slot-dot {
+    background: var(--ink-muted);
+  }
+
+  .sample-slot.muted .slot-top {
+    color: var(--ink-muted);
+  }
+
+  .slot-bar-bg {
+    width: 100%;
+    height: 2px;
+    background: var(--hairline);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .slot-bar-fill {
+    height: 100%;
+    background: var(--accent-primary);
+    transition: width 0.1s linear;
+  }
+
+  .out-meter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5px;
+    color: var(--ink-muted);
+  }
+
+  .meter-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 44px;
+  }
+
+  .meter-track {
+    width: 100%;
+    height: 3px;
+    background: var(--hairline);
+    border-radius: 1.5px;
+    overflow: hidden;
+  }
+
+  .meter-fill {
+    height: 100%;
+    width: 72%;
+    background: var(--ink-primary);
+    transition: width 0.08s ease;
+  }
+
+  .meter-fill.accent {
+    background: var(--accent-primary);
+  }
+</style>
+</head>
+<body>
+
+<input type="file" id="hiddenAudioInput" accept="audio/*,.wav,.aif,.aiff,.flac,.mp3,.ogg,.m4a" multiple style="display:none" />
+
+<div class="plugin-shell" id="pluginShell">
+  <!-- Drag-and-Drop Overlay -->
+  <div class="drop-overlay" id="dropOverlay">
+    <div class="drop-ring">
+      <div class="drop-ring-title">INGEST USER AUDIO</div>
+      <div class="drop-ring-sub" id="dropOverlaySub">RELEASE WAV / AIFF / FLAC / MP3 TO POPULATE SLOTS I–VIII</div>
+    </div>
+  </div>
+
+  <!-- =============================================================== -->
+  <!-- TOP MINIMAL HEADER BAR                                          -->
+  <!-- =============================================================== -->
+  <header class="top-bar">
+    <div class="brand">
+      <div class="brand-emblem"></div>
+      <span class="brand-title">FENICE</span>
+      <span class="brand-sub" id="modeSubtitle">CORE // 1.0</span>
+    </div>
+
+    <div class="preset-pill" id="presetPill" title="Click to cycle morph states">
+      <span class="preset-arrow">&lsaquo;</span>
+      <span class="preset-name" id="presetName">USER KIT // 01 · CUSTOM</span>
+      <span class="preset-arrow">&rsaquo;</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn-pill" id="audioToggleBtn" title="Toggle real-time WebAudio Spectral Synth">
+        <span class="dot-indicator"></span>
+        <span id="audioBtnText">AUDIO ENGINE</span>
+      </button>
+
+      <button class="btn-pill" id="morphBtn" title="Trigger SLERP Phoenix Rebirth">
+        <span>REBIRTH</span>
+      </button>
+
+      <button class="btn-pill" id="themeToggleBtn" title="Preview Future Ceramic Light Theme">
+        <span id="themeBtnText">DARK</span>
+      </button>
+
+      <div class="segmented-switch">
+        <button class="seg-btn active" id="btnMainView">MAIN</button>
+        <button class="seg-btn" id="btnProView">PRO</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =============================================================== -->
+  <!-- CENTRAL VIEWPORT (MAIN VIEW + PRO VIEW)                         -->
+  <!-- =============================================================== -->
+  <main class="viewport">
+    <!-- 1. MAIN VIEW: Single Monumental Centerpiece Control -->
+    <section class="view-layer" id="mainViewLayer">
+      <canvas id="mainCanvas" width="960" height="492"></canvas>
+
+      <div class="flank-readout left">
+        <div class="readout-label">CHIMERA BIAS // X·Y</div>
+        <div class="readout-val" id="readoutXY">+0.64 <span>·</span> 0.78</div>
+        <div class="readout-sub">HARMONIC LOCK</div>
+      </div>
+
+      <div class="flank-readout right">
+        <div class="readout-label">SPECTRAL FLUX // ORBIT</div>
+        <div class="readout-val" id="readoutOrbit">74.2% <span>·</span> 32ms</div>
+        <div class="readout-sub">TILING APERTURE</div>
+      </div>
+
+      <div class="core-caption">
+        DRAG CORE: X/Y MORPH &nbsp;&middot;&nbsp; RING: ENTROPY &nbsp;&middot;&nbsp; SCROLL: APERTURE &nbsp;&middot;&nbsp; DROP AUDIO ON CORE OR SLOTS
+      </div>
+    </section>
+
+    <!-- 2. PRO VIEW: Separate Architectural 3-Column Workspace -->
+    <section class="view-layer hidden" id="proViewLayer">
+      <div class="pro-grid">
+        <!-- Column 01: User Samples & Inspector -->
+        <div class="pro-col pro-col-compact">
+          <div class="sec-header">
+            <span>01 // USER SAMPLES <span class="mono-tag" id="proLoadedCount">3/8</span></span>
+            <div class="sec-actions">
+              <button class="btn-ghost-xs ember" id="btnProLoad" title="Load audio files from disk">+ LOAD</button>
+              <button class="btn-ghost-xs" id="btnProDemo" title="Restore 3 demo audio seeds">DEMO</button>
+              <button class="btn-ghost-xs" id="btnProClear" title="Empty all 8 slots">CLEAR</button>
+            </div>
+          </div>
+          <div class="source-list" id="proSourceList"></div>
+
+          <div class="inspector-box">
+            <div class="sec-header">
+              <span id="inspectorSlotTitle">INSPECTOR // SLOT I</span>
+              <div class="sec-actions">
+                <span class="mono-tag" id="inspectorMeta">48k · 2.40s</span>
+                <button class="btn-ghost-xs" id="btnInspSwap" title="Replace sample in selected slot">↻</button>
+                <button class="btn-ghost-xs" id="btnInspEject" title="Eject sample from selected slot">×</button>
+              </div>
+            </div>
+
+            <canvas id="inspectorWaveCanvas" width="236" height="46"></canvas>
+
+            <div class="trim-grid">
+              <div class="param-item" style="gap:3px;">
+                <div class="param-top"><span>IN</span><span class="val" id="valTrimIn">0%</span></div>
+                <input type="range" class="hairline-slider" id="sliderTrimIn" min="0" max="90" value="0" />
+              </div>
+              <div class="param-item" style="gap:3px;">
+                <div class="param-top"><span>OUT</span><span class="val" id="valTrimOut">100%</span></div>
+                <input type="range" class="hairline-slider" id="sliderTrimOut" min="10" max="100" value="100" />
+              </div>
+            </div>
+
+            <div class="param-top" style="align-items:center;">
+              <span>F0 TRACKING</span>
+              <div class="mode-pills" id="f0ModePills">
+                <button class="mode-pill-btn active" data-mode="AUTO">AUTO</button>
+                <button class="mode-pill-btn" data-mode="LOCK">LOCK</button>
+                <button class="mode-pill-btn" data-mode="FREE">FREE</button>
+              </div>
+            </div>
+
+            <div class="trim-grid">
+              <div class="param-item" style="gap:3px;">
+                <div class="param-top"><span>WHITENING</span><span class="val" id="valWhitening">42%</span></div>
+                <input type="range" class="hairline-slider" id="sliderWhitening" min="0" max="100" value="42" />
+              </div>
+              <div class="param-item" style="gap:3px;">
+                <div class="param-top"><span>SNAP</span><span class="val" id="valSnap">78%</span></div>
+                <input type="range" class="hairline-slider" id="sliderSnap" min="0" max="100" value="78" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 02: Spectral Tiling Field -->
+        <div class="pro-col">
+          <div class="sec-header">
+            <span>02 // SPECTRAL TILING TOPOLOGY</span>
+            <span class="mono-tag">ERB LOG · 24 BANDS</span>
+          </div>
+          <canvas id="proSpectrumCanvas" width="332" height="210"></canvas>
+
+          <div class="sec-header" style="margin-top:4px;">
+            <span>MARKOV TRANSITION &amp; TILING</span>
+            <span class="mono-tag">ZERO-LATENCY</span>
+          </div>
+          <div class="knobs-row">
+            <div class="knob-cell" data-knob="tile" data-val="0.64">
+              <svg class="knob-svg" viewBox="0 0 60 60"></svg>
+              <span class="knob-label">TILE SIZE</span>
+            </div>
+            <div class="knob-cell" data-knob="bands" data-val="0.78">
+              <svg class="knob-svg" viewBox="0 0 60 60"></svg>
+              <span class="knob-label">BAND SPLIT</span>
+            </div>
+            <div class="knob-cell" data-knob="entropy" data-val="0.74">
+              <svg class="knob-svg" viewBox="0 0 60 60"></svg>
+              <span class="knob-label">ENTROPY</span>
+            </div>
+            <div class="knob-cell" data-knob="cont" data-val="0.82">
+              <svg class="knob-svg" viewBox="0 0 60 60"></svg>
+              <span class="knob-label">CONTINUITY</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 03: Chimera Glue & Modulation -->
+        <div class="pro-col">
+          <div class="sec-header">
+            <span>03 // CHIMERA GLUE &amp; MOD</span>
+            <span class="mono-tag">CEPSTRAL</span>
+          </div>
+          <div class="param-group">
+            <div class="param-item">
+              <div class="param-top"><span>SHARED FORMANT ENVELOPE</span><span class="val" id="valFormant">76%</span></div>
+              <input type="range" class="hairline-slider" min="0" max="100" value="76" oninput="state.formant=this.value/100; document.getElementById('valFormant').textContent=this.value+'%'" />
+            </div>
+            <div class="param-item">
+              <div class="param-top"><span>PHASE LOCK COHERENCE</span><span class="val" id="valPhase">68%</span></div>
+              <input type="range" class="hairline-slider" min="0" max="100" value="68" oninput="document.getElementById('valPhase').textContent=this.value+'%'" />
+            </div>
+            <div class="param-item">
+              <div class="param-top"><span>SUB-HARMONIC ANCHOR</span><span class="val" id="valSub">45%</span></div>
+              <input type="range" class="hairline-slider" min="0" max="100" value="45" oninput="state.subAnchor=this.value/100; document.getElementById('valSub').textContent=this.value+'%'" />
+            </div>
+            <div class="param-item">
+              <div class="param-top"><span>SPECTRAL DIFFUSION</span><span class="val" id="valDiff">54%</span></div>
+              <input type="range" class="hairline-slider" min="0" max="100" value="54" oninput="document.getElementById('valDiff').textContent=this.value+'%'" />
+            </div>
+          </div>
+
+          <div class="sec-header" style="margin-top:auto;">
+            <span>PHILOSOPHY</span>
+            <span class="mono-tag">MONOCHROME</span>
+          </div>
+          <div style="font-size:10px; line-height:1.55; color:var(--ink-secondary);">
+            Zero rainbow clutter. Every control in PRO view directly shapes the central <strong>Fenice Eclipse</strong> singularity on the Main View.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =============================================================== -->
+  <!-- BOTTOM RECESSED SAMPLE STRIP                                    -->
+  <!-- =============================================================== -->
+  <footer class="bottom-strip">
+    <span class="strip-label">SOURCES</span>
+    <div class="sample-pills" id="bottomSamplePills"></div>
+    <div class="out-meter">
+      <span>OUT</span>
+      <div class="meter-bars">
+        <div class="meter-track"><div class="meter-fill" id="meterL"></div></div>
+        <div class="meter-track"><div class="meter-fill accent" id="meterR"></div></div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  // ===================================================================
+  // STATE, USER SAMPLE SLOTS (I–VIII) & MORPH PRESETS
+  // ===================================================================
+  const presets = [
+    { name: 'USER KIT // 01 · CUSTOM', nx: 0.22, ny: -0.24, orbit: 0.74, aperture: 36 },
+    { name: 'USER KIT // 02 · SINGULARITY', nx: -0.35, ny: -0.18, orbit: 0.88, aperture: 48 },
+    { name: 'USER KIT // 03 · CRYOGENIC', nx: 0.05, ny: 0.42, orbit: 0.42, aperture: 26 },
+    { name: 'USER KIT // 04 · CHIMERA', nx: 0.44, ny: 0.12, orbit: 0.65, aperture: 40 }
+  ];
+  let presetIdx = 0;
+
+  const romans = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+
+  function makeDemoPeaks(seedIdx) {
+    const out = [];
+    for (let i = 0; i < 64; i++) {
+      const u = i / 63;
+      const env = Math.sin(u * Math.PI);
+      const tex = 0.35 + 0.55 * Math.abs(Math.sin(u * (9 + seedIdx * 5.3) + seedIdx));
+      out.push(Math.min(0.95, Math.max(0.08, env * tex)));
+    }
+    return out;
+  }
+
+  function createEmptySlot(idx) {
+    return {
+      roman: romans[idx],
+      loaded: false,
+      active: false,
+      isDemo: false,
+      fileName: '',
+      short: '',
+      weight: 0.75,
+      trimStart: 0.0,
+      trimEnd: 1.0,
+      whitening: 0.42,
+      snap: 0.78,
+      f0Mode: 'AUTO',
+      f0Note: '—',
+      duration: 0,
+      sampleRate: 48000,
+      channels: 2,
+      buffer: null,
+      peaks: [],
+      playhead: 0,
+      demoKind: null
+    };
+  }
+
+  const sources = romans.map((_, i) => createEmptySlot(i));
+
+  function populateDemoKit() {
+    const demos = [
+      { file: 'PIANO_FELT.WAV', short: 'PIANO', weight: 0.86, note: 'C3', kind: 'piano' },
+      { file: 'VOX_CHOP.WAV', short: 'VOX_C', weight: 0.68, note: 'A2', kind: 'vox' },
+      { file: 'TAPE_HUM.WAV', short: 'TAPE', weight: 0.54, note: 'A1', kind: 'tape' }
+    ];
+    for (let i = 0; i < 8; i++) {
+      sources[i] = createEmptySlot(i);
+      if (i < demos.length) {
+        const d = demos[i];
+        sources[i].loaded = true;
+        sources[i].active = true;
+        sources[i].isDemo = true;
+        sources[i].fileName = d.file;
+        sources[i].short = d.short;
+        sources[i].weight = d.weight;
+        sources[i].f0Note = d.note;
+        sources[i].duration = 2.0;
+        sources[i].peaks = makeDemoPeaks(i + 1);
+        sources[i].demoKind = d.kind;
+        if (audioCtx) materializeDemoBuffer(sources[i]);
+      }
+    }
+    selectedSlotIdx = 0;
+    renderSourcesUI();
+  }
+
+  const state = {
+    nx: 0.22,
+    ny: -0.24,
+    targetNx: 0.22,
+    targetNy: -0.24,
+    orbit: 0.742,
+    targetOrbit: 0.742,
+    aperture: 34,
+    rebirthPulse: 0,
+    formant: 0.76,
+    subAnchor: 0.45,
+    isLight: false,
+    view: 'main',
+    dragging: null, // 'core' | 'ring' | 'knob' | null
+    time: 0
+  };
+
+  let selectedSlotIdx = 0;
+  let pendingTargetSlot = null;
+
+  // ===================================================================
+  // USER FILE INGESTION (CLICK BROWSE + DRAG & DROP)
+  // ===================================================================
+  const hiddenFileInput = document.getElementById('hiddenAudioInput');
+  const pluginShell = document.getElementById('pluginShell');
+  const dropOverlay = document.getElementById('dropOverlay');
+  const dropOverlaySub = document.getElementById('dropOverlaySub');
+
+  function openFilePicker(slotIdx = null) {
+    pendingTargetSlot = slotIdx;
+    hiddenFileInput.value = '';
+    hiddenFileInput.click();
+  }
+
+  function extractPeaks(audioBuffer, numBins = 64) {
+    const ch = audioBuffer.getChannelData(0);
+    const step = Math.max(1, Math.floor(ch.length / numBins));
+    const peaks = [];
+    for (let i = 0; i < numBins; i++) {
+      let maxVal = 0;
+      const start = i * step;
+      const end = Math.min(ch.length, start + step);
+      for (let j = start; j < end; j += Math.max(1, Math.floor(step / 16))) {
+        const v = Math.abs(ch[j]);
+        if (v > maxVal) maxVal = v;
+      }
+      peaks.push(Math.min(1, maxVal));
+    }
+    return peaks;
+  }
+
+  function makeShortName(filename) {
+    const base = filename.replace(/\.[^/.]+$/, '').toUpperCase().replace(/[^A-Z0-9_]/g, '');
+    return (base || 'AUDIO').slice(0, 7);
+  }
+
+  async function loadFilesIntoSlots(fileList, targetSlotIdx = null) {
+    const files = Array.from(fileList || []).filter(f =>
+      f.type.startsWith('audio/') || /\.(wav|aif|aiff|flac|mp3|ogg|m4a)$/i.test(f.name)
+    );
+    if (files.length === 0) return;
+
+    ensureAudioGraph();
+    let cursor = targetSlotIdx;
+
+    for (const file of files) {
+      let destIdx = cursor;
+      if (destIdx === null || destIdx === undefined) {
+        destIdx = sources.findIndex(s => !s.loaded);
+        if (destIdx === -1) destIdx = 0;
+      }
+
+      try {
+        const buf = await file.arrayBuffer();
+        const decoded = await audioCtx.decodeAudioData(buf);
+        const s = createEmptySlot(destIdx);
+        s.loaded = true;
+        s.active = true;
+        s.isDemo = false;
+        s.fileName = file.name.toUpperCase();
+        s.short = makeShortName(file.name);
+        s.weight = 0.80;
+        s.duration = decoded.duration;
+        s.sampleRate = decoded.sampleRate;
+        s.channels = decoded.numberOfChannels;
+        s.buffer = decoded;
+        s.peaks = extractPeaks(decoded, 64);
+        s.f0Note = ['A2', 'C3', 'D#3', 'F2', 'G3'][destIdx % 5];
+
+        sources[destIdx] = s;
+        selectedSlotIdx = destIdx;
+        state.rebirthPulse = 0.75;
+      } catch (err) {
+        console.warn('Could not decode audio file:', file.name, err);
+      }
+
+      if (targetSlotIdx !== null) {
+        cursor = (destIdx + 1) % 8;
+      }
+    }
+
+    renderSourcesUI();
+  }
+
+  hiddenFileInput.addEventListener('change', (e) => {
+    loadFilesIntoSlots(e.target.files, pendingTargetSlot);
+    pendingTargetSlot = null;
+  });
+
+  // Global Shell Drag-and-Drop with counter to avoid child flicker
+  let shellDragDepth = 0;
+  pluginShell.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    shellDragDepth++;
+    dropOverlaySub.textContent = 'RELEASE WAV / AIFF / FLAC / MP3 TO LOAD INTO NEXT FREE SLOTS (I–VIII)';
+    dropOverlay.classList.add('visible');
+  });
+
+  pluginShell.addEventListener('dragover', (e) => {
+    e.preventDefault();
+  });
+
+  pluginShell.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    shellDragDepth = Math.max(0, shellDragDepth - 1);
+    if (shellDragDepth === 0) dropOverlay.classList.remove('visible');
+  });
+
+  pluginShell.addEventListener('drop', (e) => {
+    e.preventDefault();
+    shellDragDepth = 0;
+    dropOverlay.classList.remove('visible');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      loadFilesIntoSlots(e.dataTransfer.files, null);
+    }
+  });
+
+  function clearSlot(idx) {
+    sources[idx] = createEmptySlot(idx);
+    renderSourcesUI();
+  }
+
+  function attachSlotDrop(el, idx) {
+    el.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      el.classList.add('drag-hover');
+      dropOverlaySub.textContent = `DROP INTO SLOT ${sources[idx].roman}`;
+    });
+    el.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    el.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      el.classList.remove('drag-hover');
+    });
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      shellDragDepth = 0;
+      el.classList.remove('drag-hover');
+      dropOverlay.classList.remove('visible');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        loadFilesIntoSlots(e.dataTransfer.files, idx);
+      }
+    });
+  }
+
+  // ===================================================================
+  // RENDER BOTTOM DOCK, PRO 8-SLOT LIST & SAMPLE INSPECTOR
+  // ===================================================================
+  const bottomStripEl = document.getElementById('bottomSamplePills');
+  const proListEl = document.getElementById('proSourceList');
+  const inspCanvas = document.getElementById('inspectorWaveCanvas');
+  const ictx = inspCanvas.getContext('2d');
+
+  function renderSourcesUI() {
+    bottomStripEl.innerHTML = '';
+    proListEl.innerHTML = '';
+
+    const loadedCount = sources.filter(s => s.loaded).length;
+    document.getElementById('proLoadedCount').textContent = `${loadedCount}/8`;
+
+    sources.forEach((src, idx) => {
+      // 1. Bottom Recessed Slot
+      const pill = document.createElement('div');
+      if (!src.loaded) {
+        pill.className = 'sample-slot empty';
+        pill.title = `Click or drop audio to load Slot ${src.roman}`;
+        pill.innerHTML = `<div class="slot-top"><span>${src.roman} · + DROP</span></div>`;
+        pill.onclick = () => openFilePicker(idx);
+      } else {
+        pill.className = 'sample-slot loaded ' + (src.active ? 'active' : 'muted');
+        pill.title = `${src.fileName} (${src.duration.toFixed(2)}s) — Click: Mute/Unmute · Hover: Swap/Eject`;
+        pill.innerHTML = `
+          <div class="slot-top">
+            <span class="slot-dot"></span>
+            <span>${src.roman}·</span><span class="slot-name-txt">${src.short}</span>
+          </div>
+          <div class="slot-bar-bg">
+            <div class="slot-bar-fill" id="slotBar_${idx}" style="width:${src.active ? Math.round(src.weight * 100) : 0}%"></div>
+          </div>
+          <div class="slot-hover-acts">
+            <button class="slot-mini-btn" data-act="swap" title="Replace audio file">↻</button>
+            <button class="slot-mini-btn" data-act="eject" title="Clear slot">×</button>
+          </div>
+        `;
+        pill.onclick = (e) => {
+          const act = e.target && e.target.dataset ? e.target.dataset.act : null;
+          if (act === 'swap') {
+            e.stopPropagation();
+            openFilePicker(idx);
+            return;
+          }
+          if (act === 'eject') {
+            e.stopPropagation();
+            clearSlot(idx);
+            return;
+          }
+          src.active = !src.active;
+          selectedSlotIdx = idx;
+          renderSourcesUI();
+        };
+      }
+      attachSlotDrop(pill, idx);
+      bottomStripEl.appendChild(pill);
+
+      // 2. Pro View Column 01 Row (All 8 User Slots)
+      const row = document.createElement('div');
+      if (!src.loaded) {
+        row.className = 'source-row empty' + (idx === selectedSlotIdx ? ' selected' : '');
+        row.innerHTML = `
+          <div class="source-row-top">
+            <span class="source-roman">${src.roman}</span>
+            <span class="source-title">+ DROP AUDIO OR CLICK TO BROWSE</span>
+            <span class="source-pct">+</span>
+          </div>
+        `;
+        row.onclick = () => openFilePicker(idx);
+      } else {
+        row.className = 'source-row' + (idx === selectedSlotIdx ? ' selected' : '') + (!src.active ? ' muted' : '');
+        row.innerHTML = `
+          <div class="source-row-top">
+            <span class="source-roman">${src.roman}</span>
+            <span class="source-title">${src.fileName}</span>
+            <span class="source-pct" id="proPct_${idx}">${src.active ? Math.round(src.weight * 100) + '%' : 'MUTE'}</span>
+            <div class="row-actions">
+              <button class="row-act-btn" data-act="swap" title="Replace sample">↻</button>
+              <button class="row-act-btn" data-act="eject" title="Remove sample">×</button>
+            </div>
+          </div>
+          <input type="range" class="hairline-slider" min="0" max="100" value="${Math.round(src.weight * 100)}" />
+        `;
+        const slider = row.querySelector('input');
+        slider.onclick = (e) => e.stopPropagation();
+        slider.oninput = (e) => {
+          src.weight = e.target.value / 100;
+          src.active = src.weight > 0.02;
+          document.getElementById('proPct_' + idx).textContent = src.active ? e.target.value + '%' : 'MUTE';
+          const bar = document.getElementById('slotBar_' + idx);
+          if (bar) bar.style.width = (src.active ? e.target.value : 0) + '%';
+        };
+        row.onclick = (e) => {
+          const act = e.target && e.target.dataset ? e.target.dataset.act : null;
+          if (act === 'swap') {
+            e.stopPropagation();
+            openFilePicker(idx);
+            return;
+          }
+          if (act === 'eject') {
+            e.stopPropagation();
+            clearSlot(idx);
+            return;
+          }
+          selectedSlotIdx = idx;
+          renderSourcesUI();
+        };
+      }
+      attachSlotDrop(row, idx);
+      proListEl.appendChild(row);
+    });
+
+    syncInspectorUI();
+  }
+
+  function syncInspectorUI() {
+    const s = sources[selectedSlotIdx];
+    const titleEl = document.getElementById('inspectorSlotTitle');
+    const metaEl = document.getElementById('inspectorMeta');
+    const trimInEl = document.getElementById('sliderTrimIn');
+    const trimOutEl = document.getElementById('sliderTrimOut');
+    const whiteEl = document.getElementById('sliderWhitening');
+    const snapEl = document.getElementById('sliderSnap');
+
+    if (!s.loaded) {
+      titleEl.textContent = `INSPECTOR // SLOT ${s.roman} EMPTY`;
+      metaEl.textContent = 'DROP AUDIO';
+      trimInEl.value = 0; trimOutEl.value = 100;
+      document.getElementById('valTrimIn').textContent = '0%';
+      document.getElementById('valTrimOut').textContent = '100%';
+    } else {
+      titleEl.textContent = `INSPECTOR // ${s.roman} · ${s.short}`;
+      metaEl.textContent = `${Math.round(s.sampleRate / 1000)}k · ${s.duration.toFixed(2)}s`;
+      trimInEl.value = Math.round(s.trimStart * 100);
+      trimOutEl.value = Math.round(s.trimEnd * 100);
+      document.getElementById('valTrimIn').textContent = `${(s.trimStart * s.duration).toFixed(2)}s`;
+      document.getElementById('valTrimOut').textContent = `${(s.trimEnd * s.duration).toFixed(2)}s`;
+      whiteEl.value = Math.round(s.whitening * 100);
+      document.getElementById('valWhitening').textContent = Math.round(s.whitening * 100) + '%';
+      snapEl.value = Math.round(s.snap * 100);
+      document.getElementById('valSnap').textContent = Math.round(s.snap * 100) + '%';
+      document.querySelectorAll('#f0ModePills .mode-pill-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.mode === s.f0Mode);
+      });
+    }
+    drawInspectorWaveform();
+  }
+
+  function drawInspectorWaveform() {
+    const w = inspCanvas.width;
+    const h = inspCanvas.height;
+    ictx.clearRect(0, 0, w, h);
+    const s = sources[selectedSlotIdx];
+    const isLight = state.isLight;
+
+    if (!s.loaded || s.peaks.length === 0) {
+      ictx.fillStyle = isLight ? 'rgba(20,20,22,0.4)' : 'rgba(255,255,255,0.28)';
+      ictx.font = '8.5px JetBrains Mono, monospace';
+      ictx.textAlign = 'center';
+      ictx.fillText('CLICK OR DROP AUDIO TO LOAD SLOT ' + s.roman, w / 2, h / 2 + 3);
+      return;
+    }
+
+    // Center axis hairline
+    ictx.strokeStyle = isLight ? 'rgba(20,20,22,0.08)' : 'rgba(255,255,255,0.06)';
+    ictx.beginPath();
+    ictx.moveTo(0, h / 2); ictx.lineTo(w, h / 2);
+    ictx.stroke();
+
+    // Waveform bars
+    const n = s.peaks.length;
+    const step = w / n;
+    for (let i = 0; i < n; i++) {
+      const u = i / (n - 1);
+      const inTrim = u >= s.trimStart && u <= s.trimEnd;
+      const amp = s.peaks[i] * (h * 0.42);
+      const x = i * step + step * 0.2;
+      ictx.fillStyle = inTrim
+        ? (isLight ? '#141416' : '#E4E4E7')
+        : (isLight ? 'rgba(20,20,22,0.16)' : 'rgba(255,255,255,0.12)');
+      ictx.fillRect(x, h / 2 - amp, Math.max(1.5, step * 0.65), Math.max(2, amp * 2));
+    }
+
+    // Dimmed inactive trim curtains
+    const xIn = s.trimStart * w;
+    const xOut = s.trimEnd * w;
+    ictx.fillStyle = isLight ? 'rgba(244,243,239,0.55)' : 'rgba(8,8,10,0.6)';
+    ictx.fillRect(0, 0, xIn, h);
+    ictx.fillRect(xOut, 0, w - xOut, h);
+
+    // Ember Trim Handles
+    ictx.strokeStyle = isLight ? '#E04800' : '#FFB800';
+    ictx.lineWidth = 1.5;
+    ictx.beginPath();
+    ictx.moveTo(xIn, 0); ictx.lineTo(xIn, h);
+    ictx.moveTo(xOut, 0); ictx.lineTo(xOut, h);
+    ictx.stroke();
+
+    // Live Grain Playhead
+    if (isAudioPlaying && s.active) {
+      const px = s.playhead * w;
+      ictx.strokeStyle = '#FF5500';
+      ictx.lineWidth = 1.2;
+      ictx.beginPath();
+      ictx.moveTo(px, 0); ictx.lineTo(px, h);
+      ictx.stroke();
+    }
+  }
+
+  // Inspector Interactions
+  inspCanvas.onclick = () => {
+    if (!sources[selectedSlotIdx].loaded) openFilePicker(selectedSlotIdx);
+  };
+  document.getElementById('btnProLoad').onclick = () => openFilePicker(null);
+  document.getElementById('btnProDemo').onclick = () => populateDemoKit();
+  document.getElementById('btnProClear').onclick = () => {
+    for (let i = 0; i < 8; i++) sources[i] = createEmptySlot(i);
+    renderSourcesUI();
+  };
+  document.getElementById('btnInspSwap').onclick = () => openFilePicker(selectedSlotIdx);
+  document.getElementById('btnInspEject').onclick = () => clearSlot(selectedSlotIdx);
+
+  document.getElementById('sliderTrimIn').oninput = (e) => {
+    const s = sources[selectedSlotIdx];
+    if (!s.loaded) return;
+    s.trimStart = Math.min(s.trimEnd - 0.08, e.target.value / 100);
+    syncInspectorUI();
+  };
+  document.getElementById('sliderTrimOut').oninput = (e) => {
+    const s = sources[selectedSlotIdx];
+    if (!s.loaded) return;
+    s.trimEnd = Math.max(s.trimStart + 0.08, e.target.value / 100);
+    syncInspectorUI();
+  };
+  document.getElementById('sliderWhitening').oninput = (e) => {
+    const s = sources[selectedSlotIdx];
+    s.whitening = e.target.value / 100;
+    document.getElementById('valWhitening').textContent = e.target.value + '%';
+  };
+  document.getElementById('sliderSnap').oninput = (e) => {
+    const s = sources[selectedSlotIdx];
+    s.snap = e.target.value / 100;
+    document.getElementById('valSnap').textContent = e.target.value + '%';
+  };
+  document.querySelectorAll('#f0ModePills .mode-pill-btn').forEach(btn => {
+    btn.onclick = () => {
+      const s = sources[selectedSlotIdx];
+      s.f0Mode = btn.dataset.mode;
+      syncInspectorUI();
+    };
+  });
+
+  // ===================================================================
+  // WEBAUDIO USER-SAMPLE GRANULAR / SPECTRAL CHIMERA ENGINE
+  // ===================================================================
+  let audioCtx = null;
+  let masterGain = null;
+  let delayFbGain = null;
+  let isAudioPlaying = false;
+  let grainTimer = null;
+
+  function ensureAudioGraph() {
+    if (audioCtx) return;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContextClass();
+
+    const comp = audioCtx.createDynamicsCompressor();
+    comp.threshold.value = -12;
+    comp.ratio.value = 4;
+
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.55;
+
+    const delayL = audioCtx.createDelay();
+    const delayR = audioCtx.createDelay();
+    delayL.delayTime.value = 0.13;
+    delayR.delayTime.value = 0.21;
+    delayFbGain = audioCtx.createGain();
+    delayFbGain.gain.value = 0.26;
+
+    masterGain.connect(comp);
+    comp.connect(audioCtx.destination);
+    masterGain.connect(delayL);
+    delayL.connect(delayR);
+    delayR.connect(delayFbGain);
+    delayFbGain.connect(delayL);
+    delayR.connect(comp);
+  }
+
+  function materializeDemoBuffer(src) {
+    if (!audioCtx || src.buffer || !src.demoKind) return;
+    const sr = audioCtx.sampleRate;
+    const len = Math.floor(sr * 2.0);
+    const buf = audioCtx.createBuffer(1, len, sr);
+    const data = buf.getChannelData(0);
+
+    for (let i = 0; i < len; i++) {
+      const t = i / sr;
+      const env = Math.sin(Math.min(1, t / 0.15) * Math.PI * 0.5) * Math.exp(-t * 0.55);
+      let s = 0;
+      if (src.demoKind === 'piano') {
+        s = 0.45 * Math.sin(2 * Math.PI * 130.81 * t)
+          + 0.28 * Math.sin(2 * Math.PI * 196.0 * t)
+          + 0.18 * Math.sin(2 * Math.PI * 329.63 * t);
+      } else if (src.demoKind === 'vox') {
+        const vibr = Math.sin(2 * Math.PI * 4.5 * t) * 2.0;
+        s = 0.4 * Math.sin(2 * Math.PI * (220 + vibr) * t)
+          + 0.25 * Math.sin(2 * Math.PI * (440 + vibr) * t)
+          + 0.15 * Math.sin(2 * Math.PI * 660 * t);
+      } else {
+        s = 0.5 * Math.sin(2 * Math.PI * 55 * t)
+          + 0.25 * Math.sin(2 * Math.PI * 110.4 * t)
+          + 0.08 * (Math.random() * 2 - 1);
+      }
+      data[i] = s * env * 0.7;
+    }
+    src.buffer = buf;
+    src.duration = buf.duration;
+    src.sampleRate = sr;
+  }
+
+  function scheduleGrainStep() {
+    if (!isAudioPlaying || !audioCtx) return;
+    const activeLoaded = sources
+      .map((src, idx) => ({ src, idx }))
+      .filter(item => item.src.loaded && item.src.active);
+
+    if (activeLoaded.length === 0) return;
+
+    const now = audioCtx.currentTime;
+    const morphX = (state.nx + 1) * 0.5;
+    const morphY = (1 - state.ny) * 0.5;
+    const grainDur = Math.max(0.06, Math.min(0.28, (state.aperture / 62) * 0.24));
+
+    if (delayFbGain) {
+      delayFbGain.gain.setTargetAtTime(0.12 + state.orbit * 0.34, now, 0.08);
+    }
+
+    activeLoaded.forEach(({ src, idx }) => {
+      if (!src.buffer && src.demoKind) materializeDemoBuffer(src);
+      if (!src.buffer) return;
+
+      const angle = (idx / 8) * Math.PI * 2;
+      const sx = Math.cos(angle) * 0.6;
+      const sy = Math.sin(angle) * 0.6;
+      const dist = Math.hypot(state.nx - sx, state.ny - sy);
+      const proximity = Math.max(0.08, 1.15 - dist * 0.85);
+      const amp = src.weight * proximity * 0.35;
+      if (amp < 0.02) return;
+
+      const startSec = src.trimStart * src.buffer.duration;
+      const spanSec = Math.max(0.05, (src.trimEnd - src.trimStart) * src.buffer.duration);
+      const jitter = Math.random() * Math.max(0.01, spanSec - Math.min(grainDur, spanSec * 0.8));
+      const offset = startSec + jitter;
+      src.playhead = offset / src.buffer.duration;
+
+      const node = audioCtx.createBufferSource();
+      node.buffer = src.buffer;
+
+      if (src.f0Mode === 'FREE') {
+        node.playbackRate.value = 1.0 + (state.orbit - 0.5) * 0.14 + (Math.random() - 0.5) * 0.03;
+      } else if (src.f0Mode === 'LOCK') {
+        node.playbackRate.value = 1.0 + (morphY - 0.5) * 0.04;
+      } else {
+        node.playbackRate.value = 1.0 + (Math.random() - 0.5) * state.orbit * 0.05;
+      }
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 160 + morphY * 2200 + state.formant * 650 + morphX * 450 * (idx % 3);
+      filter.Q.value = 0.7 + state.orbit * 4.5 * (1 - src.whitening * 0.5);
+
+      const env = audioCtx.createGain();
+      env.gain.setValueAtTime(0.0001, now);
+      env.gain.linearRampToValueAtTime(amp, now + grainDur * 0.42);
+      env.gain.exponentialRampToValueAtTime(0.0001, now + grainDur);
+
+      node.connect(filter);
+      filter.connect(env);
+      env.connect(masterGain);
+
+      const dur = Math.min(grainDur, Math.max(0.04, src.buffer.duration - offset));
+      node.start(now, offset, dur);
+      node.stop(now + dur + 0.02);
+    });
+  }
+
+  function startGrainScheduler() {
+    stopGrainScheduler();
+    const tick = () => {
+      if (!isAudioPlaying) return;
+      scheduleGrainStep();
+      const intervalMs = Math.max(48, Math.round((state.aperture / 62) * 120));
+      grainTimer = setTimeout(tick, intervalMs);
+    };
+    tick();
+  }
+
+  function stopGrainScheduler() {
+    if (grainTimer) {
+      clearTimeout(grainTimer);
+      grainTimer = null;
+    }
+  }
+
+  function toggleAudioEngine() {
+    const btn = document.getElementById('audioToggleBtn');
+    const txt = document.getElementById('audioBtnText');
+
+    if (!isAudioPlaying) {
+      ensureAudioGraph();
+      sources.forEach(s => { if (s.loaded && s.demoKind && !s.buffer) materializeDemoBuffer(s); });
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      isAudioPlaying = true;
+      btn.classList.add('active-audio');
+      txt.textContent = 'AUDIO ACTIVE';
+      startGrainScheduler();
+    } else {
+      isAudioPlaying = false;
+      btn.classList.remove('active-audio');
+      txt.textContent = 'AUDIO ENGINE';
+      stopGrainScheduler();
+    }
+  }
+
+  document.getElementById('audioToggleBtn').onclick = toggleAudioEngine;
+
+  // ===================================================================
+  // MAIN VIEW INTERACTIVE CANVAS — THE FENICE ECLIPSE
+  // ===================================================================
+  const mainCanvas = document.getElementById('mainCanvas');
+  const ctx = mainCanvas.getContext('2d');
+  const CX = 480;
+  const CY = 242;
+  const CORE_R = 148;
+  const RING_R = 176;
+
+  function updateReadouts() {
+    const signX = state.nx >= 0 ? '+' : '';
+    const normY = ((1 - state.ny) * 0.5).toFixed(2);
+    document.getElementById('readoutXY').innerHTML = `${signX}${state.nx.toFixed(2)} <span>·</span> ${normY}`;
+    const ms = Math.round(state.aperture * 0.95);
+    document.getElementById('readoutOrbit').innerHTML = `${(state.orbit * 100).toFixed(1)}% <span>·</span> ${ms}ms`;
+  }
+
+  mainCanvas.addEventListener('mousedown', (e) => {
+    const rect = mainCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const dist = Math.hypot(mx - CX, my - CY);
+
+    if (dist <= CORE_R) {
+      state.dragging = 'core';
+      setCoreFromMouse(mx, my);
+    } else if (dist <= RING_R + 26) {
+      state.dragging = 'ring';
+      setRingFromMouse(mx, my);
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!state.dragging) return;
+    if (state.dragging === 'knob' && activeKnobCell) {
+      const dy = knobDragStartY - e.clientY;
+      const next = Math.max(0.04, Math.min(0.98, knobDragStartVal + dy * 0.005));
+      activeKnobCell.dataset.val = next.toFixed(2);
+      if (activeKnobCell.dataset.knob === 'entropy') state.targetOrbit = next;
+      if (activeKnobCell.dataset.knob === 'tile') state.aperture = 18 + next * 44;
+      renderKnobs();
+      return;
+    }
+    const rect = mainCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    if (state.dragging === 'core') setCoreFromMouse(mx, my);
+    if (state.dragging === 'ring') setRingFromMouse(mx, my);
+  });
+
+  window.addEventListener('mouseup', () => {
+    state.dragging = null;
+    activeKnobCell = null;
+  });
+
+  mainCanvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    state.aperture = Math.max(18, Math.min(62, state.aperture - e.deltaY * 0.04));
+    updateReadouts();
+  }, { passive: false });
+
+  function triggerRebirth() {
+    state.rebirthPulse = 1.0;
+    state.targetNx = (Math.random() * 1.3 - 0.65);
+    state.targetNy = (Math.random() * 1.3 - 0.65);
+    state.targetOrbit = 0.25 + Math.random() * 0.7;
+  }
+
+  mainCanvas.addEventListener('dblclick', triggerRebirth);
+  document.getElementById('morphBtn').onclick = triggerRebirth;
+
+  function setCoreFromMouse(mx, my) {
+    let dx = (mx - CX) / (CORE_R - 18);
+    let dy = (my - CY) / (CORE_R - 18);
+    const mag = Math.hypot(dx, dy);
+    if (mag > 1) {
+      dx /= mag;
+      dy /= mag;
+    }
+    state.targetNx = dx;
+    state.targetNy = dy;
+  }
+
+  function setRingFromMouse(mx, my) {
+    let angle = Math.atan2(my - CY, mx - CX);
+    let deg = (angle * 180 / Math.PI + 360) % 360;
+    let rel = (deg - 135 + 360) % 360;
+    let norm = rel > 315 ? 0.02 : Math.max(0.02, Math.min(0.98, rel / 270));
+    state.targetOrbit = norm;
+  }
+
+  function drawMainEclipse() {
+    ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+    const isLight = state.isLight;
+    const accentPrimary = isLight ? '#E04800' : '#FF5500';
+    const hairlineColor = isLight ? 'rgba(20,20,22,0.06)' : 'rgba(255,255,255,0.04)';
+    const activeLoaded = sources.filter(s => s.loaded && s.active).length;
+    const anyLoaded = sources.some(s => s.loaded);
+
+    // 1. Subtle Architectural Axis Hairlines
+    ctx.strokeStyle = hairlineColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(CX, 0); ctx.lineTo(CX, mainCanvas.height);
+    ctx.moveTo(0, CY); ctx.lineTo(mainCanvas.width, CY);
+    ctx.stroke();
+
+    // 2. Outer Machined Ring Track
+    ctx.beginPath();
+    ctx.arc(CX, CY, RING_R, 0, Math.PI * 2);
+    ctx.strokeStyle = isLight ? '#E5E3DC' : '#15151C';
+    ctx.lineWidth = 16;
+    ctx.stroke();
+
+    // Degree Ticks around Ring
+    for (let i = 0; i < 60; i++) {
+      const a = (i / 60) * Math.PI * 2;
+      const r1 = RING_R - 3;
+      const r2 = RING_R + (i % 5 === 0 ? 6 : 3);
+      ctx.beginPath();
+      ctx.moveTo(CX + Math.cos(a) * r1, CY + Math.sin(a) * r1);
+      ctx.lineTo(CX + Math.cos(a) * r2, CY + Math.sin(a) * r2);
+      ctx.strokeStyle = isLight
+        ? (i % 5 === 0 ? 'rgba(20,20,22,0.35)' : 'rgba(20,20,22,0.14)')
+        : (i % 5 === 0 ? 'rgba(244,244,246,0.42)' : 'rgba(255,255,255,0.12)');
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // 3. Active Outer Ring Arc (Spectral Entropy)
+    const startAngle = (135 * Math.PI) / 180;
+    const endAngle = startAngle + state.orbit * (270 * Math.PI / 180);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(CX, CY, RING_R, startAngle, endAngle);
+    ctx.strokeStyle = anyLoaded ? accentPrimary : (isLight ? 'rgba(20,20,22,0.3)' : 'rgba(228,228,231,0.3)');
+    ctx.lineWidth = 3.5;
+    ctx.lineCap = 'round';
+    if (!isLight && anyLoaded) {
+      ctx.shadowColor = '#FF5500';
+      ctx.shadowBlur = 12;
+    }
+    ctx.stroke();
+
+    const hx = CX + Math.cos(endAngle) * RING_R;
+    const hy = CY + Math.sin(endAngle) * RING_R;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 5.5, 0, Math.PI * 2);
+    ctx.fillStyle = isLight ? '#FAF9F5' : '#09090B';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = anyLoaded ? (isLight ? '#E04800' : '#FFB800') : '#71717A';
+    ctx.stroke();
+    ctx.restore();
+
+    // 4. Inner Singularity Well
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(CX, CY, CORE_R, 0, Math.PI * 2);
+    ctx.fillStyle = isLight ? '#FAF9F5' : '#0A0A0E';
+    ctx.fill();
+    ctx.strokeStyle = isLight ? 'rgba(20,20,22,0.14)' : 'rgba(255,255,255,0.09)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.clip();
+
+    const nodeX = CX + state.nx * (CORE_R - 22);
+    const nodeY = CY + state.ny * (CORE_R - 22);
+
+    // Concentric Radar Hairlines
+    [42, 82, 118].forEach(r => {
+      ctx.beginPath();
+      ctx.arc(CX, CY, r, 0, Math.PI * 2);
+      ctx.strokeStyle = hairlineColor;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    if (!anyLoaded) {
+      // Dormant Core State: Inviting user to drop audio files
+      const pulse = 0.5 + 0.5 * Math.sin(state.time * 1.8);
+      ctx.beginPath();
+      ctx.arc(CX, CY, 54 + pulse * 6, 0, Math.PI * 2);
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = isLight ? 'rgba(224,72,0,0.45)' : 'rgba(255,85,0,0.45)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = isLight ? '#141416' : '#E4E4E7';
+      ctx.font = '600 10px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('0 / 8 USER SAMPLES', CX, CY - 4);
+      ctx.fillStyle = isLight ? '#71717A' : '#71717A';
+      ctx.font = '8.5px JetBrains Mono, monospace';
+      ctx.fillText('DROP WAV HERE OR CLICK SLOTS BELOW', CX, CY + 14);
+      ctx.restore();
+      return;
+    }
+
+    // Ember Bloom inside Core
+    const bloom = ctx.createRadialGradient(nodeX, nodeY, 4, nodeX, nodeY, CORE_R * 1.05);
+    if (isLight) {
+      bloom.addColorStop(0, 'rgba(224, 72, 0, 0.22)');
+      bloom.addColorStop(0.5, 'rgba(224, 72, 0, 0.05)');
+      bloom.addColorStop(1, 'rgba(224, 72, 0, 0)');
+    } else {
+      bloom.addColorStop(0, `rgba(255, 184, 0, ${0.18 + Math.min(0.22, activeLoaded * 0.045)})`);
+      bloom.addColorStop(0.35, 'rgba(255, 85, 0, 0.16)');
+      bloom.addColorStop(1, 'rgba(255, 85, 0, 0)');
+    }
+    ctx.fillStyle = bloom;
+    ctx.fillRect(CX - CORE_R, CY - CORE_R, CORE_R * 2, CORE_R * 2);
+
+    // Subtle Radial User Slot Compass Anchors around inner rim
+    sources.forEach((src, i) => {
+      if (!src.loaded) return;
+      const a = (i / 8) * Math.PI * 2;
+      const ax = CX + Math.cos(a) * (CORE_R - 10);
+      const ay = CY + Math.sin(a) * (CORE_R - 10);
+      ctx.beginPath();
+      ctx.arc(ax, ay, src.active ? 2.5 : 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = src.active ? accentPrimary : (isLight ? 'rgba(20,20,22,0.2)' : 'rgba(255,255,255,0.2)');
+      ctx.fill();
+    });
+
+    // 5. Generative Spectral Filaments
+    const numFilaments = Math.max(4, Math.min(10, 4 + activeLoaded * 2));
+    for (let f = 0; f < numFilaments; f++) {
+      const isEmber = f >= numFilaments - 2 && activeLoaded > 0;
+      ctx.beginPath();
+      const steps = 48;
+      for (let s = 0; s <= steps; s++) {
+        const u = s / steps;
+        const x = (CX - CORE_R) + u * (CORE_R * 2);
+        const distToNode = Math.abs(x - nodeX) / CORE_R;
+        const pull = Math.exp(-distToNode * distToNode * 3.5);
+        const wave = Math.sin(u * Math.PI * (3 + f * 0.7) + state.time * (1.4 + f * 0.15))
+                   * (12 + state.orbit * 26) * (1 - pull * 0.55);
+        const spread = (f - (numFilaments - 1) / 2) * 14 * (1 - pull * 0.72);
+        const y = CY * (1 - pull) + nodeY * pull + spread + wave;
+
+        if (s === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      if (isEmber) {
+        ctx.strokeStyle = f === numFilaments - 1
+          ? (isLight ? '#141416' : '#FFB800')
+          : accentPrimary;
+        ctx.lineWidth = f === numFilaments - 1 ? 1.6 : 2.0;
+      } else {
+        ctx.strokeStyle = isLight
+          ? `rgba(20, 20, 22, ${0.08 + f * 0.025})`
+          : `rgba(228, 228, 231, ${0.08 + f * 0.035})`;
+        ctx.lineWidth = 1.0;
+      }
+      ctx.stroke();
+    }
+
+    // 6. 2D Magnetic Singularity Node + Scroll Aperture Ring
+    const apR = state.aperture + state.rebirthPulse * 35;
+    ctx.beginPath();
+    ctx.arc(nodeX, nodeY, apR, 0, Math.PI * 2);
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = isLight ? 'rgba(20,20,22,0.35)' : 'rgba(255,184,0,0.45)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.beginPath();
+    ctx.arc(nodeX, nodeY, apR * 0.58, 0, Math.PI * 2);
+    ctx.fillStyle = isLight ? 'rgba(224,72,0,0.08)' : 'rgba(255,85,0,0.10)';
+    ctx.fill();
+    ctx.strokeStyle = accentPrimary;
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(nodeX, nodeY, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = isLight ? '#141416' : '#FFF3D1';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = accentPrimary;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // ===================================================================
+  // PRO VIEW INTERACTIVE SPECTRUM & ROTARY KNOBS
+  // ===================================================================
+  const proCanvas = document.getElementById('proSpectrumCanvas');
+  const pctx = proCanvas.getContext('2d');
+
+  function drawProSpectrum() {
+    const w = proCanvas.width;
+    const h = proCanvas.height;
+    pctx.clearRect(0, 0, w, h);
+    const isLight = state.isLight;
+    const activeCount = sources.filter(s => s.loaded && s.active).length;
+
+    pctx.strokeStyle = isLight ? 'rgba(20,20,22,0.05)' : 'rgba(255,255,255,0.04)';
+    pctx.lineWidth = 1;
+    for (let i = 1; i < 4; i++) {
+      pctx.beginPath();
+      pctx.moveTo(0, (h / 4) * i); pctx.lineTo(w, (h / 4) * i);
+      pctx.moveTo((w / 4) * i, 0); pctx.lineTo((w / 4) * i, h);
+      pctx.stroke();
+    }
+
+    // Secondary Silver Ash Input Spectral Envelope
+    pctx.beginPath();
+    for (let x = 0; x <= w; x += 4) {
+      const u = x / w;
+      const amp = activeCount === 0 ? 4 : 20;
+      const y = h * 0.72 - Math.sin(u * Math.PI * 3 + state.time * 1.2) * amp
+                - Math.cos(u * Math.PI * 7 - state.time) * (amp * 0.5) * state.orbit;
+      if (x === 0) pctx.moveTo(x, y);
+      else pctx.lineTo(x, y);
+    }
+    pctx.strokeStyle = isLight ? 'rgba(20,20,22,0.35)' : 'rgba(228,228,231,0.42)';
+    pctx.setLineDash([3, 3]);
+    pctx.lineWidth = 1.2;
+    pctx.stroke();
+    pctx.setLineDash([]);
+
+    // Primary Ember Chimera Transfer Curve
+    pctx.beginPath();
+    for (let x = 0; x <= w; x += 3) {
+      const u = x / w;
+      const scale = activeCount === 0 ? 0.15 : 1.0;
+      const peak = Math.exp(-Math.pow(u - (state.nx + 1) * 0.5, 2) * 8) * (40 + state.formant * 30) * scale;
+      const y = h * 0.68 - peak - Math.sin(u * Math.PI * 5 + state.time * 2) * (6 + state.orbit * 14) * scale;
+      if (x === 0) pctx.moveTo(x, y);
+      else pctx.lineTo(x, y);
+    }
+    pctx.strokeStyle = isLight ? '#E04800' : '#FF5500';
+    pctx.lineWidth = 2;
+    pctx.stroke();
+  }
+
+  let activeKnobCell = null;
+  let knobDragStartY = 0;
+  let knobDragStartVal = 0;
+
+  function renderKnobs() {
+    document.querySelectorAll('.knob-cell').forEach((cell, idx) => {
+      const val = parseFloat(cell.dataset.val);
+      const svg = cell.querySelector('svg');
+      const r = 22;
+      const cx = 30, cy = 30;
+      const startA = 135 * Math.PI / 180;
+      const endA = (135 + val * 270) * Math.PI / 180;
+      const x1 = cx + r * Math.cos(startA);
+      const y1 = cy + r * Math.sin(startA);
+      const x2 = cx + r * Math.cos(endA);
+      const y2 = cy + r * Math.sin(endA);
+      const largeArc = val * 270 > 180 ? 1 : 0;
+      const color = idx % 2 === 1 ? 'var(--accent-primary)' : 'var(--ink-primary)';
+
+      svg.innerHTML = `
+        <circle cx="30" cy="30" r="${r}" fill="none" stroke="var(--hairline)" stroke-width="3"/>
+        <path d="M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+        <text x="30" y="33" fill="var(--ink-primary)" font-family="JetBrains Mono, monospace" font-size="9.5" text-anchor="middle">${Math.round(val * 100)}%</text>
+      `;
+
+      if (!cell.dataset.bound) {
+        cell.dataset.bound = '1';
+        cell.addEventListener('mousedown', (e) => {
+          state.dragging = 'knob';
+          activeKnobCell = cell;
+          knobDragStartY = e.clientY;
+          knobDragStartVal = parseFloat(cell.dataset.val);
+        });
+      }
+    });
+  }
+  renderKnobs();
+
+  // ===================================================================
+  // TOP BAR SWITCHERS (MAIN / PRO, DARK / LIGHT, KIT CYCLER)
+  // ===================================================================
+  const btnMain = document.getElementById('btnMainView');
+  const btnPro = document.getElementById('btnProView');
+  const mainLayer = document.getElementById('mainViewLayer');
+  const proLayer = document.getElementById('proViewLayer');
+  const subtitle = document.getElementById('modeSubtitle');
+
+  btnMain.onclick = () => {
+    state.view = 'main';
+    btnMain.classList.add('active');
+    btnPro.classList.remove('active');
+    mainLayer.classList.remove('hidden');
+    proLayer.classList.add('hidden');
+    subtitle.textContent = 'CORE // 1.0';
+  };
+
+  btnPro.onclick = () => {
+    state.view = 'pro';
+    btnPro.classList.add('active');
+    btnMain.classList.remove('active');
+    proLayer.classList.remove('hidden');
+    mainLayer.classList.add('hidden');
+    subtitle.textContent = 'ARCHITECTURAL PRO';
+  };
+
+  document.getElementById('themeToggleBtn').onclick = () => {
+    state.isLight = !state.isLight;
+    document.body.classList.toggle('theme-light', state.isLight);
+    document.getElementById('themeBtnText').textContent = state.isLight ? 'LIGHT' : 'DARK';
+    drawInspectorWaveform();
+  };
+
+  document.getElementById('presetPill').onclick = () => {
+    presetIdx = (presetIdx + 1) % presets.length;
+    const p = presets[presetIdx];
+    document.getElementById('presetName').textContent = p.name;
+    state.targetNx = p.nx;
+    state.targetNy = p.ny;
+    state.targetOrbit = p.orbit;
+    state.aperture = p.aperture;
+    state.rebirthPulse = 0.6;
+  };
+
+  // Initialize with 3 user-demo seeds + 5 free drop slots
+  populateDemoKit();
+
+  // ===================================================================
+  // 60FPS ANIMATION LOOP
+  // ===================================================================
+  function animate() {
+    state.time += 0.025;
+    state.nx += (state.targetNx - state.nx) * 0.14;
+    state.ny += (state.targetNy - state.ny) * 0.14;
+    state.orbit += (state.targetOrbit - state.orbit) * 0.14;
+    state.rebirthPulse *= 0.90;
+
+    updateReadouts();
+
+    if (state.view === 'main') {
+      drawMainEclipse();
+    } else {
+      drawProSpectrum();
+      drawInspectorWaveform();
+    }
+
+    const activeCount = sources.filter(s => s.loaded && s.active).length;
+    const base = activeCount === 0 ? 0 : (isAudioPlaying ? 56 : 22);
+    const activity = base === 0 ? 0 : base + Math.sin(state.time * 3.1) * 14 * state.orbit;
+    document.getElementById('meterL').style.width = (base === 0 ? 0 : Math.min(96, Math.max(12, activity))) + '%';
+    document.getElementById('meterR').style.width = (base === 0 ? 0 : Math.min(96, Math.max(12, activity - 5 + Math.cos(state.time * 4.3) * 8))) + '%';
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>
+</body>
+</html>
